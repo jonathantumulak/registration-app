@@ -15,3 +15,19 @@ export const login = async ({ username, password }) => {
 export const register = async ({ username, password, password2 }) => {
   return await api.post('/', { username, password, password2 })
 }
+
+export const logout = async () => {
+  return await api.get('/logout')
+}
+
+export const getProfile = async (id) => {
+  return await api.get(`/${id}`)
+}
+
+export const updateProfile = async ({ id, first_name, last_name, birth_date, gender }, csrf) => {
+  return await api.put(
+    `/${id}`,
+    { first_name, last_name, birth_date, gender },
+    { headers: { 'X-CSRFToken': csrf } }
+  )
+}

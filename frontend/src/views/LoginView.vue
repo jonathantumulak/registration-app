@@ -16,10 +16,10 @@ const userStore = useUserStore()
 const { getUserNewRegistered } = storeToRefs(userStore)
 const { loginUser } = userStore
 
-let username = ref('')
-let password = ref('')
-let submitting = ref(false)
-let errorMessage = ref()
+const username = ref('')
+const password = ref('')
+const submitting = ref(false)
+const errorMessage = ref()
 
 const submitLogin = async () => {
   errorMessage.value = null
@@ -48,9 +48,9 @@ const submitLogin = async () => {
 </script>
 
 <template>
-  <main class="flex justify-content-center align-items-center flex-wrap h-30rem">
+  <main class="flex justify-content-center align-items-center flex-wrap">
     <div class="flex align-items-center justify-content-center font-bold border-round">
-      <Card>
+      <Card class="mt-5">
         <template #title>Login</template>
         <template #content>
           <Message v-if="getUserNewRegistered">Registered successfully. Login to proceed.</Message>
@@ -85,6 +85,7 @@ const submitLogin = async () => {
             </div>
             <div class="flex justify-content-end flex-wrap">
               <Button
+                :loading="submitting"
                 type="submit"
                 label="Login"
                 class="flex align-items-center justify-content-center"

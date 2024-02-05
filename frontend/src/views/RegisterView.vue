@@ -14,11 +14,11 @@ import { useUserStore } from '@/store/user'
 const userStore = useUserStore()
 const { registerUser } = userStore
 
-let username = ref('')
-let password = ref('')
-let password2 = ref('')
-let submitting = ref(false)
-let errorMessage = ref()
+const username = ref('')
+const password = ref('')
+const password2 = ref('')
+const submitting = ref(false)
+const errorMessage = ref()
 
 const submitRegister = async () => {
   errorMessage.value = null
@@ -48,9 +48,9 @@ const submitRegister = async () => {
 </script>
 
 <template>
-  <main class="flex justify-content-center align-items-center flex-wrap h-30rem">
+  <main class="flex justify-content-center align-items-center flex-wrap">
     <div class="flex align-items-center justify-content-center font-bold border-round">
-      <Card>
+      <Card class="mt-5">
         <template #title>Register</template>
         <template #content>
           <transition-group name="p-message" tag="div">
@@ -99,6 +99,7 @@ const submitRegister = async () => {
             </div>
             <div class="flex justify-content-end flex-wrap">
               <Button
+                :loading="submitting"
                 type="submit"
                 label="Register"
                 class="flex align-items-center justify-content-center"
