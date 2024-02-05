@@ -1,22 +1,23 @@
 <script setup>
 import { RouterView } from 'vue-router'
-import Menubar from 'primevue/menubar';
-
-import { ref } from 'vue'
+import Menubar from 'primevue/menubar'
 
 
 </script>
 
 <template>
-  <Menubar>
-    <template #start>
-      Registration App
-    </template>
-    <template #end>
-    </template>
-  </Menubar>
+  <header>
+    <Menubar>
+      <template #start>
+        Registration App
+      </template>
+      <template #end>
+      </template>
+    </Menubar>
+  </header>
 
   <RouterView />
 </template>
 
-<style scoped></style>
+<style scoped>
+</style>
