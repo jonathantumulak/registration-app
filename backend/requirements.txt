@@ -11,3 +11,5 @@ drf_yasg==1.21.7
 pytest_django==4.8.0
 factory_boy==3.3.0
 django_webtest==1.9.11
+coverage==7.4.1
+pytest_cov==4.1.0

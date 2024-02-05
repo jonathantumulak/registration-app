@@ -48,7 +48,6 @@ onMounted(() => {
 })
 
 watch(jobSectionDisabled, (newVal, oldVal) => {
-  console.log(newVal)
   if (!newVal && oldVal) {
     activeStep.value = 1
   }

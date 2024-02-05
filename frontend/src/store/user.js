@@ -252,7 +252,6 @@ export const useUserStore = defineStore('user', {
           }
         }
       } catch (error) {
-        console.log(error)
         return {
           success: false,
           errors: error.response.data

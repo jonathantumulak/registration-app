@@ -8,7 +8,7 @@ from apps.registration.models import (
 
 
 class UserSerializer(serializers.ModelSerializer):
-    id = serializers.CharField(read_only=True)
+    id = serializers.IntegerField(read_only=True)
     first_name = serializers.CharField()
     last_name = serializers.CharField()
     birth_date = serializers.DateField(source="profile.birth_date", input_formats=["iso-8601", "%Y-%m-%dT%H:%M:%S.%fZ"])
@@ -49,9 +49,6 @@ class UserCreateSerializer(serializers.ModelSerializer):
         username = validated_data["username"]
         password = validated_data["password"]
         password2 = validated_data["password2"]
-
-        if User.objects.filter(username=validated_data["username"]).exists():
-            raise serializers.ValidationError("Username already exists")
         if password != password2:
             raise serializers.ValidationError("Passwords do not match")
 

@@ -37,7 +37,8 @@ watch(getUserInterestsData, (userInterests) => {
 
 const submitInterests = async () => {
   errorMessage.value = null
-  if (selectedInterests.value === []) {
+  console.log(selectedInterests.value.length)
+  if (selectedInterests.value.length === 0) {
     await nextTick(() => {
       errorMessage.value = ['Please select an interest']
     })

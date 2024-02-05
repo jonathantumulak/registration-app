@@ -57,6 +57,7 @@ const submitPersonalInformation = async () => {
     firstName.value === '' ||
     lastName.value === '' ||
     birthDate.value === '' ||
+    birthDate.value === null ||
     genderField.value === ''
   ) {
     await nextTick(() => {
