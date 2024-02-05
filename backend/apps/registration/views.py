@@ -23,13 +23,20 @@ from apps.registration.permissions import OwnUserPermission
 from apps.registration.serializers import (
     InterestsSerializer,
     UserCreateSerializer,
+    UserInterestsSerializer,
+    UserInterestsWriteSerializer,
     UserLoginSerializer,
     UserProfileSerializer,
     UserSerializer,
 )
 
 
-class UserViewSet(viewsets.ModelViewSet):
+class ListNotAllowedMixin:
+    def list(self, request, *args, **kwargs):
+        raise MethodNotAllowed("GET", detail='Method "GET" not allowed without lookup')
+
+
+class UserViewSet(ListNotAllowedMixin, viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = []
@@ -46,9 +53,6 @@ class UserViewSet(viewsets.ModelViewSet):
         if self.action in ["retrieve", "update"]:
             return [IsAuthenticated(), OwnUserPermission()]
         return super().get_permissions()
-
-    def list(self, request, *args, **kwargs):
-        raise MethodNotAllowed("GET", detail='Method "GET" not allowed without lookup')
 
     @action(methods=["POST"], detail=False)
     def login(self, request, format=None):
@@ -82,7 +86,7 @@ class UserViewSet(viewsets.ModelViewSet):
         return Response(status=status.HTTP_200_OK)
 
 
-class UserProfileViewSet(viewsets.ModelViewSet):
+class UserProfileViewSet(ListNotAllowedMixin, viewsets.ModelViewSet):
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated, OwnUserPermission]
@@ -94,12 +98,21 @@ class UserProfileViewSet(viewsets.ModelViewSet):
         obj = get_object_or_404(UserProfile, user=user)
         return obj
 
-    def list(self, request, *args, **kwargs):
-        raise MethodNotAllowed("GET", detail='Method "GET" not allowed without lookup')
-
 
 class InterestsViewSet(viewsets.ModelViewSet):
     queryset = Interest.objects.all()
     serializer_class = InterestsSerializer
     permission_classes = [IsAuthenticated]
     http_method_names = ["get"]
+
+
+class UserInterestsViewSet(ListNotAllowedMixin, viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserInterestsSerializer
+    permission_classes = [IsAuthenticated, OwnUserPermission]
+    http_method_names = ["get", "put"]
+
+    def get_serializer_class(self):
+        if self.action == "update":
+            return UserInterestsWriteSerializer
+        return UserInterestsSerializer

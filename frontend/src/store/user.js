@@ -7,7 +7,9 @@ import {
   updateProfile,
   getProfile,
   updateJobPreference,
-  getJobPreference
+  getJobPreference,
+  getUserInterests,
+  updateUserInterests
 } from '@/services/api.js'
 
 export const useUserStore = defineStore('user', {
@@ -17,15 +19,19 @@ export const useUserStore = defineStore('user', {
     isAuthenticated: false,
     newRegistered: false,
     profileData: null,
-    jobPreferenceData: null
+    jobPreferenceData: null,
+    userInterestsData: null,
+    completedWelcome: false
   }),
   getters: {
     getCSRF: (state) => state.csrf,
     getUserIsAuth: (state) => state.isAuthenticated,
     getUserNewRegistered: (state) => state.newRegistered,
     getUserId: (state) => state.userId,
+    getCompletedWelcome: (state) => state.completedSteps,
     getProfileData: (state) => state.profileData,
     getJobPreferenceData: (state) => state.jobPreferenceData,
+    getUserInterestsData: (state) => state.userInterestsData,
     isProfileDataSubmitted: (state) => {
       if (state.profileData) {
         const { first_name, last_name, birth_date, gender } = state.profileData
@@ -38,6 +44,14 @@ export const useUserStore = defineStore('user', {
       if (state.jobPreferenceData) {
         const { experience_level, expected_salary } = state.jobPreferenceData
         return !(experience_level === null && expected_salary === null)
+      }
+
+      return false
+    },
+    isUserInterestsDataSubmitted: (state) => {
+      if (state.userInterestsData) {
+        const { interests } = state.userInterestsData
+        return !(interests === [])
       }
 
       return false
@@ -56,11 +70,17 @@ export const useUserStore = defineStore('user', {
     setNewRegistered(newRegistered) {
       this.newRegistered = newRegistered
     },
+    setCompletedWelcome(completedWelcome) {
+      this.completedWelcome = completedWelcome
+    },
     setProfileData(profileData) {
       this.profileData = profileData
     },
     setJobPreferenceData(jobPreferenceData) {
       this.jobPreferenceData = jobPreferenceData
+    },
+    setUserInterestsData(userInterestsData) {
+      this.userInterestsData = userInterestsData
     },
     async userIsAuthenticated() {
       try {
@@ -113,15 +133,22 @@ export const useUserStore = defineStore('user', {
         if (status === 200) {
           this.setUserIsAuth(true)
           this.setUserId(data['id'])
+          this.setCompletedWelcome(data['completed_welcome'])
+          this.setProfileData(data)
           return {
             success: true,
+            completed_welcome: data['completed_welcome'],
             errors: null
           }
         }
       } catch (error) {
+        let message = error.response.data
+        if (error.response.status === 404) {
+          message = ['User not found']
+        }
         return {
           success: false,
-          errors: error.response.data
+          errors: message
         }
       }
       return {
@@ -133,8 +160,14 @@ export const useUserStore = defineStore('user', {
       try {
         const { status } = await logout()
         if (status === 200) {
+          this.setCSRF(null)
           this.setUserIsAuth(false)
           this.setUserId(null)
+          this.setNewRegistered(false)
+          this.setCompletedWelcome(false)
+          this.setProfileData(null)
+          this.setUserInterestsData(null)
+          this.setJobPreferenceData(null)
           return {
             success: true
           }
@@ -245,6 +278,60 @@ export const useUserStore = defineStore('user', {
         )
         if (status === 200) {
           this.setJobPreferenceData(data)
+          return {
+            success: true,
+            errors: null
+          }
+        }
+      } catch (error) {
+        return {
+          success: false,
+          errors: error.response.data
+        }
+      }
+      return {
+        success: false,
+        errors: ['Internal Server Error']
+      }
+    },
+    async getUserInterests(id) {
+      if (id === undefined) {
+        id = this.getUserId
+      }
+      try {
+        const { status, data } = await getUserInterests(id)
+        if (status === 200) {
+          this.setUserInterestsData(data['interests'])
+          return {
+            success: true,
+            data: data
+          }
+        }
+      } catch (error) {
+        return {
+          success: false,
+          errors: error.response.data
+        }
+      }
+      return {
+        success: false,
+        errors: ['Internal Server Error']
+      }
+    },
+    async updateUserInterests({ id, interests }) {
+      if (id === undefined) {
+        id = this.getUserId
+      }
+      try {
+        const { status } = await updateUserInterests(
+          {
+            id,
+            interests
+          },
+          this.getCSRF
+        )
+        if (status === 200) {
+          this.setCompletedWelcome(true)
           return {
             success: true,
             errors: null

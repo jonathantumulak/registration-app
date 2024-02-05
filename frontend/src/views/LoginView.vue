@@ -14,7 +14,7 @@ import router from '@/router/index.js'
 
 const userStore = useUserStore()
 const { getUserNewRegistered } = storeToRefs(userStore)
-const { loginUser } = userStore
+const { loginUser, setNewRegistered } = userStore
 
 const username = ref('')
 const password = ref('')
@@ -30,14 +30,21 @@ const submitLogin = async () => {
     return
   }
   submitting.value = true
-  const { success, errors } = await loginUser({
+  const { success, completed_welcome, errors } = await loginUser({
     username: username.value,
     password: password.value
   })
+  setNewRegistered(false)
   if (success) {
-    await router.push({
-      name: 'home'
-    })
+    if (completed_welcome) {
+      await router.push({
+        name: 'home'
+      })
+    } else {
+      await router.push({
+        name: 'welcome'
+      })
+    }
   } else {
     if (errors) {
       errorMessage.value = errors

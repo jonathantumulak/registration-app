@@ -1,11 +1,12 @@
 <script setup>
-import { ref, watch, onMounted, nextTick } from 'vue'
 import InputText from 'primevue/inputtext'
 import Calendar from 'primevue/calendar'
 import Button from 'primevue/button'
 import Dropdown from 'primevue/dropdown'
 import Message from 'primevue/message'
 
+import { ref, watch, onMounted, nextTick } from 'vue'
+import { genderMap } from '@/services/constants.js'
 import { useUserStore } from '@/store/user.js'
 import { storeToRefs } from 'pinia'
 const userStore = useUserStore()
@@ -18,21 +19,15 @@ const birthDate = ref('')
 const genderField = ref('')
 const submitting = ref(false)
 const errorMessage = ref()
+const message = ref()
 
-const genderOptions = ref([
-  {
-    label: 'Male',
-    value: 1
-  },
-  {
-    label: 'Female',
-    value: 2
-  },
-  {
-    label: 'Other',
-    value: 3
-  }
-])
+const genderOptions = ref([])
+Object.keys(genderMap).forEach((key) => {
+  genderOptions.value.push({
+    label: genderMap[key],
+    value: parseInt(key)
+  })
+})
 
 const setFields = (profileData) => {
   const { first_name, last_name, birth_date, gender } = profileData
@@ -43,7 +38,9 @@ const setFields = (profileData) => {
 }
 
 watch(getProfileData, (profileData) => {
-  setFields(profileData)
+  if (profileData) {
+    setFields(profileData)
+  }
 })
 
 onMounted(() => {
@@ -75,6 +72,7 @@ const submitPersonalInformation = async () => {
     gender: genderField.value
   })
   if (success) {
+    message.value = 'Information updated'
     submitting.value = false
   } else {
     if (errors) {
@@ -89,6 +87,9 @@ const submitPersonalInformation = async () => {
   <transition-group name="p-message" tag="div">
     <Message v-for="(msg, index) in errorMessage" :key="index" severity="error">
       {{ msg }}
+    </Message>
+    <Message v-if="message">
+      {{ message }}
     </Message>
   </transition-group>
   <form @submit.prevent="submitting === false && submitPersonalInformation()">

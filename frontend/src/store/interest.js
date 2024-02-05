@@ -1,11 +1,11 @@
 import { defineStore } from 'pinia'
-import { getInterests } from '@/services/api.js'
+import { getAllInterests } from '@/services/api.js'
 
 export const useInterestsStore = defineStore('interests', {
   actions: {
-    async getInterests() {
+    async getAllInterests() {
       try {
-        const { status, data } = await getInterests()
+        const { status, data } = await getAllInterests()
         if (status === 200) {
           return {
             success: true,

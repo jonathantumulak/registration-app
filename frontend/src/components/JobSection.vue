@@ -1,10 +1,11 @@
 <script setup>
-import { nextTick, onMounted, ref, watch } from 'vue'
 import Dropdown from 'primevue/dropdown'
 import Button from 'primevue/button'
 import Message from 'primevue/message'
 import InputNumber from 'primevue/inputnumber'
 
+import { nextTick, onMounted, ref, watch } from 'vue'
+import { experienceLevelMap } from '@/services/constants.js'
 import { useUserStore } from '@/store/user.js'
 import { storeToRefs } from 'pinia'
 
@@ -16,21 +17,15 @@ const experienceLevel = ref(null)
 const expectedSalary = ref(null)
 const submitting = ref(false)
 const errorMessage = ref()
+const message = ref()
 
-const experienceLevelOptions = ref([
-  {
-    label: 'Entry level',
-    value: 1
-  },
-  {
-    label: 'Manager',
-    value: 2
-  },
-  {
-    label: 'Other',
-    value: 3
-  }
-])
+const experienceLevelOptions = ref([])
+Object.keys(experienceLevelMap).forEach((key) => {
+  experienceLevelOptions.value.push({
+    label: experienceLevelMap[key],
+    value: parseInt(key)
+  })
+})
 
 const setFields = (jobPreferenceData) => {
   const { experience_level, expected_salary } = jobPreferenceData
@@ -41,7 +36,9 @@ const setFields = (jobPreferenceData) => {
 }
 
 watch(getJobPreferenceData, (jobPreferenceData) => {
-  setFields(jobPreferenceData)
+  if (jobPreferenceData) {
+    setFields(jobPreferenceData)
+  }
 })
 
 onMounted(() => {
@@ -66,6 +63,7 @@ const submitJobInformation = async () => {
     expected_salary: expectedSalary.value
   })
   if (success) {
+    message.value = 'Information updated'
     submitting.value = false
   } else {
     if (errors) {
@@ -80,6 +78,9 @@ const submitJobInformation = async () => {
   <transition-group name="p-message" tag="div">
     <Message v-for="(msg, index) in errorMessage" :key="index" severity="error">
       {{ msg }}
+    </Message>
+    <Message v-if="message">
+      {{ message }}
     </Message>
   </transition-group>
   <form @submit.prevent="submitting === false && submitJobInformation()">

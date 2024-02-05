@@ -13,7 +13,7 @@ class UserProfileAdmin(admin.ModelAdmin):
 
 
 class InterestAdmin(admin.ModelAdmin):
-    list_display = ("name",)
+    list_display = ("name", "slug")
     search_fields = ("name",)
     raw_id_fields = ("users",)
 

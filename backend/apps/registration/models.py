@@ -1,5 +1,6 @@
 from django.contrib.auth.models import User
 from django.db import models
+from django.template.defaultfilters import slugify
 
 
 class UserProfile(models.Model):
@@ -52,7 +53,16 @@ class UserProfile(models.Model):
 
 class Interest(models.Model):
     name = models.CharField(verbose_name="Name", max_length=255)
+    slug = models.SlugField(editable=False)
     users = models.ManyToManyField(User, related_name="interests")
 
     class Meta:
         app_label = "registration"
+
+    def __str__(self):
+        return self.name
+
+    def save(self, *args, **kwargs):
+        if not self.id:
+            self.slug = slugify(self.name)
+        return super().save(*args, **kwargs)

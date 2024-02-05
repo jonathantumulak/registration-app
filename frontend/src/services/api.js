@@ -44,6 +44,14 @@ export const updateJobPreference = async ({ id, experience_level, expected_salar
   )
 }
 
-export const getInterests = async () => {
+export const getAllInterests = async () => {
   return await api.get(`interests`)
+}
+
+export const getUserInterests = async (id) => {
+  return await api.get(`user-interests/${id}`)
+}
+
+export const updateUserInterests = async ({ id, interests }, csrf) => {
+  return await api.put(`user-interests/${id}`, { interests }, { headers: { 'X-CSRFToken': csrf } })
 }

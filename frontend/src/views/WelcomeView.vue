@@ -7,7 +7,7 @@ import PersonalSection from '@/components/PersonalSection.vue'
 import JobSection from '@/components/JobSection.vue'
 import InterestsSection from '@/components/InterestsSection.vue'
 
-import { ref, reactive, computed, watch } from 'vue'
+import { ref, reactive, computed, watch, onMounted } from 'vue'
 import { useUserStore } from '@/store/user.js'
 import { storeToRefs } from 'pinia'
 
@@ -37,7 +37,18 @@ const stepItems = reactive([
   }
 ])
 
+onMounted(() => {
+  if (!interestsSectionDisabled.value) {
+    activeStep.value = 2
+    return
+  }
+  if (!jobSectionDisabled.value) {
+    activeStep.value = 1
+  }
+})
+
 watch(jobSectionDisabled, (newVal, oldVal) => {
+  console.log(newVal)
   if (!newVal && oldVal) {
     activeStep.value = 1
   }

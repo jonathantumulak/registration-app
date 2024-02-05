@@ -8,3 +8,6 @@ flake8==7.0.0
 isort==5.13.2
 pre-commit==3.6.0
 drf_yasg==1.21.7
+pytest_django==4.8.0
+factory_boy==3.3.0
+django_webtest==1.9.11

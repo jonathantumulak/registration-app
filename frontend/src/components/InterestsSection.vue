@@ -1,31 +1,63 @@
 <script setup>
 import Message from 'primevue/message'
 import Listbox from 'primevue/listbox'
-
-import { onMounted, ref } from 'vue'
-// import { useUserStore } from '@/store/user.js'
-import { useInterestsStore } from '@/store/interest.js'
 import Button from 'primevue/button'
-// import { storeToRefs } from "pinia";
 
-// const userStore = useUserStore()
-// const {  } = storeToRefs(userStore)
-// const {  } = userStore
+import { nextTick, onMounted, ref, watch } from 'vue'
+import { useUserStore } from '@/store/user.js'
+import { useInterestsStore } from '@/store/interest.js'
+import { storeToRefs } from 'pinia'
+import router from '@/router/index.js'
+
+const userStore = useUserStore()
+const { getUserInterestsData } = storeToRefs(userStore)
+const { getUserInterests, updateUserInterests } = userStore
 
 const interestsStore = useInterestsStore()
-const { getInterests } = interestsStore
+const { getAllInterests } = interestsStore
 
 const interestOptions = ref([])
 const selectedInterests = ref([])
 const submitting = ref(false)
+const message = ref()
 const errorMessage = ref()
 
 onMounted(async () => {
-  const { data } = await getInterests()
+  const { data } = await getAllInterests()
   interestOptions.value = data
+
+  getUserInterests()
 })
 
-const submitInterests = async () => {}
+watch(getUserInterestsData, (userInterests) => {
+  if (userInterests && userInterests.length >= 0) {
+    selectedInterests.value = userInterests.map((el) => el.id)
+  }
+})
+
+const submitInterests = async () => {
+  errorMessage.value = null
+  if (selectedInterests.value === []) {
+    await nextTick(() => {
+      errorMessage.value = ['Please select an interest']
+    })
+    return
+  }
+  submitting.value = true
+  const { success, errors } = await updateUserInterests({
+    interests: selectedInterests.value
+  })
+  if (success) {
+    submitting.value = false
+    message.value = 'Information updated'
+    await router.push({ name: 'home' })
+  } else {
+    if (errors) {
+      errorMessage.value = errors
+      submitting.value = false
+    }
+  }
+}
 </script>
 
 <template>
@@ -33,6 +65,9 @@ const submitInterests = async () => {}
   <transition-group name="p-message" tag="div">
     <Message v-for="(msg, index) in errorMessage" :key="index" severity="error">
       {{ msg }}
+    </Message>
+    <Message v-if="message">
+      {{ message }}
     </Message>
   </transition-group>
   <form @submit.prevent="submitting === false && submitInterests()">

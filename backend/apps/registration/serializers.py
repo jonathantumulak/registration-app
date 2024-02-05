@@ -13,10 +13,11 @@ class UserSerializer(serializers.ModelSerializer):
     last_name = serializers.CharField()
     birth_date = serializers.DateField(source="profile.birth_date", input_formats=["iso-8601", "%Y-%m-%dT%H:%M:%S.%fZ"])
     gender = serializers.ChoiceField(choices=UserProfile.GENDERS, source="profile.gender")
+    completed_welcome = serializers.BooleanField(source="profile.completed_welcome", default=False)
 
     class Meta:
         model = User
-        fields = ["id", "first_name", "last_name", "birth_date", "gender"]
+        fields = ["id", "first_name", "last_name", "birth_date", "gender", "completed_welcome"]
 
     def update(self, instance, validated_data):
         profile = validated_data.pop("profile", None)
@@ -85,3 +86,37 @@ class InterestsSerializer(serializers.ModelSerializer):
     class Meta:
         model = Interest
         fields = ["id", "name"]
+        read_only_fields = ["name"]
+
+
+class UserInterestsSerializer(serializers.ModelSerializer):
+    interests = InterestsSerializer(many=True)
+
+    class Meta:
+        model = User
+        fields = [
+            "interests",
+        ]
+        read_only_fields = ["interests"]
+
+
+class UserInterestsWriteSerializer(serializers.ModelSerializer):
+    interests = serializers.PrimaryKeyRelatedField(
+        queryset=Interest.objects.all(),
+        read_only=False,
+        many=True,
+    )
+
+    class Meta:
+        model = User
+        fields = [
+            "interests",
+        ]
+
+    def update(self, instance, validated_data):
+        instance = super().update(instance, validated_data)
+        # mark steps as completed
+        if not instance.profile.completed_welcome:
+            instance.profile.completed_welcome = True
+            instance.profile.save()
+        return instance
