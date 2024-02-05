@@ -1,7 +1,10 @@
 from django.contrib.auth.models import User
 from rest_framework import serializers
 
-from apps.registration.models import UserProfile
+from apps.registration.models import (
+    Interest,
+    UserProfile,
+)
 
 
 class UserSerializer(serializers.ModelSerializer):
@@ -67,3 +70,18 @@ class UserLoginSerializer(serializers.ModelSerializer):
     class Meta:
         model = User
         fields = ["id", "username", "password"]
+
+
+class UserProfileSerializer(serializers.ModelSerializer):
+    experience_level = serializers.ChoiceField(choices=UserProfile.EXPERIENCE_LEVELS)
+    expected_salary = serializers.DecimalField(max_digits=10, decimal_places=2)
+
+    class Meta:
+        model = UserProfile
+        fields = ["experience_level", "expected_salary"]
+
+
+class InterestsSerializer(serializers.ModelSerializer):
+    class Meta:
+        model = Interest
+        fields = ["id", "name"]

@@ -4,9 +4,10 @@ import InputText from 'primevue/inputtext'
 import Calendar from 'primevue/calendar'
 import Button from 'primevue/button'
 import Dropdown from 'primevue/dropdown'
+import Message from 'primevue/message'
+
 import { useUserStore } from '@/store/user.js'
 import { storeToRefs } from 'pinia'
-
 const userStore = useUserStore()
 const { getProfileData } = storeToRefs(userStore)
 const { getProfile, updateProfile } = userStore
@@ -85,6 +86,11 @@ const submitPersonalInformation = async () => {
 </script>
 
 <template>
+  <transition-group name="p-message" tag="div">
+    <Message v-for="(msg, index) in errorMessage" :key="index" severity="error">
+      {{ msg }}
+    </Message>
+  </transition-group>
   <form @submit.prevent="submitting === false && submitPersonalInformation()">
     <div class="field">
       <label for="firstname">First Name</label>

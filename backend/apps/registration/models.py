@@ -6,7 +6,7 @@ class UserProfile(models.Model):
     MALE = 1
     FEMALE = 2
     OTHER = 3
-    GENDERS = CHOICES = (
+    GENDERS = (
         (MALE, "Male"),
         (FEMALE, "Female"),
         (OTHER, "Other"),
@@ -20,6 +20,31 @@ class UserProfile(models.Model):
         blank=True,
         null=True,
     )
+
+    ENTRY_LEVEL = 1
+    MANAGER = 2
+    OTHER = 3
+
+    EXPERIENCE_LEVELS = (
+        (ENTRY_LEVEL, "Entry level"),
+        (MANAGER, "Manager"),
+        (OTHER, "Other"),
+    )
+
+    experience_level = models.PositiveSmallIntegerField(
+        verbose_name="Job title",
+        choices=EXPERIENCE_LEVELS,
+        blank=True,
+        null=True,
+    )
+    expected_salary = models.DecimalField(
+        verbose_name="Expected salary",
+        decimal_places=2,
+        max_digits=10,
+        blank=True,
+        null=True,
+    )
+    completed_welcome = models.BooleanField(default=False)
 
     class Meta:
         app_label = "registration"

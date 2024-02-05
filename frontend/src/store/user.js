@@ -1,5 +1,14 @@
 import { defineStore } from 'pinia'
-import { session, login, register, logout, updateProfile, getProfile } from '@/services/api.js'
+import {
+  session,
+  login,
+  register,
+  logout,
+  updateProfile,
+  getProfile,
+  updateJobPreference,
+  getJobPreference
+} from '@/services/api.js'
 
 export const useUserStore = defineStore('user', {
   state: () => ({
@@ -7,14 +16,32 @@ export const useUserStore = defineStore('user', {
     userId: null,
     isAuthenticated: false,
     newRegistered: false,
-    profileData: null
+    profileData: null,
+    jobPreferenceData: null
   }),
   getters: {
     getCSRF: (state) => state.csrf,
     getUserIsAuth: (state) => state.isAuthenticated,
     getUserNewRegistered: (state) => state.newRegistered,
     getUserId: (state) => state.userId,
-    getProfileData: (state) => state.profileData
+    getProfileData: (state) => state.profileData,
+    getJobPreferenceData: (state) => state.jobPreferenceData,
+    isProfileDataSubmitted: (state) => {
+      if (state.profileData) {
+        const { first_name, last_name, birth_date, gender } = state.profileData
+        return !(first_name === '' || last_name === '' || birth_date === null || gender === null)
+      }
+
+      return false
+    },
+    isJobPreferenceDataSubmitted: (state) => {
+      if (state.jobPreferenceData) {
+        const { experience_level, expected_salary } = state.jobPreferenceData
+        return !(experience_level === null && expected_salary === null)
+      }
+
+      return false
+    }
   },
   actions: {
     setCSRF(csrf) {
@@ -31,6 +58,9 @@ export const useUserStore = defineStore('user', {
     },
     setProfileData(profileData) {
       this.profileData = profileData
+    },
+    setJobPreferenceData(jobPreferenceData) {
+      this.jobPreferenceData = jobPreferenceData
     },
     async userIsAuthenticated() {
       try {
@@ -159,6 +189,62 @@ export const useUserStore = defineStore('user', {
         )
         if (status === 200) {
           this.setProfileData(data)
+          return {
+            success: true,
+            errors: null
+          }
+        }
+      } catch (error) {
+        return {
+          success: false,
+          errors: error.response.data
+        }
+      }
+      return {
+        success: false,
+        errors: ['Internal Server Error']
+      }
+    },
+    async getJobPreference(id) {
+      if (id === undefined) {
+        id = this.getUserId
+      }
+      try {
+        const { status, data } = await getJobPreference(id)
+        if (status === 200) {
+          this.setJobPreferenceData(data)
+          return {
+            success: true,
+            data: data
+          }
+        }
+      } catch (error) {
+        console.log(error)
+        return {
+          success: false,
+          errors: error.response.data
+        }
+      }
+      return {
+        success: false,
+        errors: ['Internal Server Error']
+      }
+    },
+    async updateJobPreference({ id, experience_level, expected_salary }) {
+      if (id === undefined) {
+        id = this.getUserId
+      }
+      try {
+        const { status, data } = await updateJobPreference(
+          {
+            id,
+            experience_level,
+            expected_salary
+          },
+          this.getCSRF
+        )
+        if (status === 200) {
+          this.setJobPreferenceData(data)
           return {
             success: true,
             errors: null

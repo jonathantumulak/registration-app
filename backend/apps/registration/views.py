@@ -10,11 +10,21 @@ from rest_framework import (
     viewsets,
 )
 from rest_framework.decorators import action
+from rest_framework.exceptions import MethodNotAllowed
+from rest_framework.generics import get_object_or_404
+from rest_framework.permissions import IsAuthenticated
 from rest_framework.response import Response
 
+from apps.registration.models import (
+    Interest,
+    UserProfile,
+)
+from apps.registration.permissions import OwnUserPermission
 from apps.registration.serializers import (
+    InterestsSerializer,
     UserCreateSerializer,
     UserLoginSerializer,
+    UserProfileSerializer,
     UserSerializer,
 )
 
@@ -31,6 +41,14 @@ class UserViewSet(viewsets.ModelViewSet):
         elif self.action == "login":
             return UserLoginSerializer
         return UserSerializer
+
+    def get_permissions(self):
+        if self.action in ["retrieve", "update"]:
+            return [IsAuthenticated(), OwnUserPermission()]
+        return super().get_permissions()
+
+    def list(self, request, *args, **kwargs):
+        raise MethodNotAllowed("GET", detail='Method "GET" not allowed without lookup')
 
     @action(methods=["POST"], detail=False)
     def login(self, request, format=None):
@@ -62,3 +80,26 @@ class UserViewSet(viewsets.ModelViewSet):
             return Response(status=status.HTTP_404_NOT_FOUND)
         logout(request)
         return Response(status=status.HTTP_200_OK)
+
+
+class UserProfileViewSet(viewsets.ModelViewSet):
+    queryset = User.objects.all()
+    serializer_class = UserProfileSerializer
+    permission_classes = [IsAuthenticated, OwnUserPermission]
+    http_method_names = ["get", "put"]
+
+    def get_object(self):
+        """Provide related user profile instead"""
+        user = super().get_object()
+        obj = get_object_or_404(UserProfile, user=user)
+        return obj
+
+    def list(self, request, *args, **kwargs):
+        raise MethodNotAllowed("GET", detail='Method "GET" not allowed without lookup')
+
+
+class InterestsViewSet(viewsets.ModelViewSet):
+    queryset = Interest.objects.all()
+    serializer_class = InterestsSerializer
+    permission_classes = [IsAuthenticated]
+    http_method_names = ["get"]

@@ -55,9 +55,9 @@ const submitLogin = async () => {
         <template #content>
           <Message v-if="getUserNewRegistered">Registered successfully. Login to proceed.</Message>
           <transition-group name="p-message" tag="div">
-            <Message v-for="(msg, index) in errorMessage" :key="index" severity="error">{{
-              msg
-            }}</Message>
+            <Message v-for="(msg, index) in errorMessage" :key="index" severity="error">
+              {{ msg }}
+            </Message>
           </transition-group>
           <form @submit.prevent="submitting === false && submitLogin()">
             <div class="field">

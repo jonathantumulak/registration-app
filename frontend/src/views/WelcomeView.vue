@@ -7,19 +7,19 @@ import PersonalSection from '@/components/PersonalSection.vue'
 import JobSection from '@/components/JobSection.vue'
 import InterestsSection from '@/components/InterestsSection.vue'
 
-import { ref, reactive, computed, onMounted } from 'vue'
+import { ref, reactive, computed, watch } from 'vue'
 import { useUserStore } from '@/store/user.js'
 import { storeToRefs } from 'pinia'
 
 const userStore = useUserStore()
-const { getProfileData } = storeToRefs(userStore)
+const { isProfileDataSubmitted, isJobPreferenceDataSubmitted } = storeToRefs(userStore)
 
 const jobSectionDisabled = computed(() => {
-  if (getProfileData.value) {
-    const { first_name, last_name, birth_date, gender } = getProfileData.value
-    return (first_name && last_name && birth_date && gender) !== 1
-  }
-  return false
+  return !isProfileDataSubmitted.value
+})
+
+const interestsSectionDisabled = computed(() => {
+  return !isJobPreferenceDataSubmitted.value
 })
 
 const activeStep = ref(0)
@@ -29,17 +29,23 @@ const stepItems = reactive([
   },
   {
     label: 'Job Preference',
-    disabled: jobSectionDisabled.value
+    disabled: () => jobSectionDisabled.value
   },
   {
     label: 'Interests',
-    disabled: true
+    disabled: () => interestsSectionDisabled.value
   }
 ])
 
-onMounted(() => {
-  if (!jobSectionDisabled.value) {
+watch(jobSectionDisabled, (newVal, oldVal) => {
+  if (!newVal && oldVal) {
     activeStep.value = 1
+  }
+})
+
+watch(interestsSectionDisabled, (newVal, oldVal) => {
+  if (!newVal && oldVal) {
+    activeStep.value = 2
   }
 })
 </script>
@@ -48,7 +54,6 @@ onMounted(() => {
   <main class="flex justify-content-center align-items-center flex-wrap w-screen">
     <div class="flex align-items-center justify-content-center font-bold border-round w-screen">
       <Card class="w-8 mt-5">
-        <template #title>Welcome</template>
         <template #content>
           <Steps v-model:activeStep="activeStep" :model="stepItems" :readonly="false" />
           <Divider />
