@@ -1,26 +1,70 @@
 <script setup>
-  import { RouterLink } from 'vue-router'
-  import Card from 'primevue/card';
-  import InputText from 'primevue/inputtext';
-  import Button from 'primevue/button';
-  import Divider from 'primevue/divider';
-  import Password from 'primevue/password';
+import { RouterLink } from 'vue-router'
+import Card from 'primevue/card'
+import InputText from 'primevue/inputtext'
+import Button from 'primevue/button'
+import Divider from 'primevue/divider'
+import Password from 'primevue/password'
+import Message from 'primevue/message'
 
-  import { ref } from 'vue';
+import { ref, nextTick } from 'vue'
+import { register } from '@/services/api'
+import router from '@/router'
+import { useUserStore } from '@/store/user'
 
-  let username = ref();
-  let password = ref();
+let username = ref('')
+let password = ref('')
+let password2 = ref('')
+let submitting = ref(false)
+let errorMessage = ref()
 
+const userStore = useUserStore()
+const { setNewRegistered } = userStore
+
+function registerUser() {
+  errorMessage.value = null
+  if (username.value === '' || password.value === '' || password2.value === '') {
+    nextTick(() => {
+      errorMessage.value = ['Please input all required fields.']
+    })
+    return
+  }
+  submitting.value = true
+  errorMessage.value = null
+  register({
+    username: username.value,
+    password: password.value,
+    password2: password2.value
+  })
+    .then(() => {
+      router.push({
+        name: 'login'
+      })
+      setNewRegistered(true)
+    })
+    .catch((error) => {
+      errorMessage.value = error.response.data
+    })
+    .then(() => {
+      submitting.value = false
+    })
+}
 </script>
 
 <template>
-    <main class="flex justify-content-center align-items-center flex-wrap h-30rem">
-      <div class="flex align-items-center justify-content-center font-bold border-round">
-        <Card>
-          <template #title>Register</template>
-          <template #content>
+  <main class="flex justify-content-center align-items-center flex-wrap h-30rem">
+    <div class="flex align-items-center justify-content-center font-bold border-round">
+      <Card>
+        <template #title>Register</template>
+        <template #content>
+          <transition-group name="p-message" tag="div">
+            <Message v-for="(msg, index) in errorMessage" :key="index" severity="error">{{
+              msg
+            }}</Message>
+          </transition-group>
+          <form @submit.prevent="submitting === false && registerUser()">
             <div class="field">
-              <label for="firstname1">Username</label>
+              <label for="username">Username</label>
               <InputText
                 v-model="username"
                 type="text"
@@ -28,7 +72,7 @@
               />
             </div>
             <div class="field">
-              <label for="lastname1">Password</label>
+              <label for="password">Password</label>
               <Password
                 v-model="password"
                 :feedback="false"
@@ -36,14 +80,30 @@
                 :pt="{
                   input: {
                     root: {
-                     class: ['w-full']
+                      class: ['w-full']
                     }
-                  },
+                  }
+                }"
+              />
+            </div>
+            <div class="field">
+              <label for="password2">Confirm Password</label>
+              <Password
+                v-model="password2"
+                :feedback="false"
+                class="w-full"
+                :pt="{
+                  input: {
+                    root: {
+                      class: ['w-full']
+                    }
+                  }
                 }"
               />
             </div>
             <div class="flex justify-content-end flex-wrap">
               <Button
+                type="submit"
                 label="Register"
                 class="flex align-items-center justify-content-center"
                 icon="pi pi-user-plus"
@@ -61,12 +121,11 @@
                 />
               </RouterLink>
             </div>
-          </template>
-        </Card>
-      </div>
-    </main>
+          </form>
+        </template>
+      </Card>
+    </div>
+  </main>
 </template>
 
-
-<style scoped>
-</style>
+<style scoped></style>
