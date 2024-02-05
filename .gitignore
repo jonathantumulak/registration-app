@@ -78,3 +78,4 @@ media/
 venv
 
 .env
+*.sqlite3
