@@ -39,9 +39,10 @@ class UserCreateSerializer(serializers.ModelSerializer):
 
 
 class UserLoginSerializer(serializers.ModelSerializer):
+    id = serializers.CharField(read_only=True)
     username = serializers.CharField(write_only=True)
     password = serializers.CharField(write_only=True)
 
     class Meta:
         model = User
-        fields = ["username", "password"]
+        fields = ["id", "username", "password"]

@@ -32,20 +32,18 @@ class UserViewSet(viewsets.ModelViewSet):
 
     @action(methods=["POST"], detail=False)
     def login(self, request, format=None):
-        serializer = UserLoginSerializer(data=request.data)
+        serializer = self.get_serializer_class()(data=request.data)
         if serializer.is_valid():
             user = authenticate(
                 username=serializer.validated_data["username"], password=serializer.validated_data["password"]
             )
             if user:
                 login(request, user)
-                return Response(status=status.HTTP_200_OK)
+                user_serializer = UserSerializer(instance=user)
+                return Response(user_serializer.data, status=status.HTTP_200_OK)
 
         return Response(status=status.HTTP_404_NOT_FOUND)
 
     @action(methods=["GET"], detail=False)
     def session(self, request, format=None):
-        if not request.user.is_authenticated:
-            return Response({"isAuthenticated": False}, status=status.HTTP_200_OK)
-
-        return Response({"isAuthenticated": True}, status=status.HTTP_200_OK)
+        return Response({"is_authenticated": request.user.is_authenticated}, status=status.HTTP_200_OK)

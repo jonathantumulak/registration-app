@@ -7,14 +7,7 @@ const router = createRouter({
     {
       path: '/',
       name: 'home',
-      component: () => import('../views/HomeView.vue'),
-      beforeEnter: (to, from, next) => {
-        const userStore = useUserStore()
-        if (userStore.userIsAuth === false) {
-          return next('/login')
-        }
-        return next()
-      }
+      component: () => import('../views/HomeView.vue')
     },
     {
       path: '/login',
@@ -28,6 +21,19 @@ const router = createRouter({
       component: () => import('../views/RegisterView.vue')
     }
   ]
+})
+
+router.beforeEach(async (to) => {
+  const userStore = useUserStore()
+  const { userIsAuthenticated } = userStore
+
+  const userAuthenticated = await userIsAuthenticated()
+
+  if (userAuthenticated && ['login', 'register'].includes(to.name)) {
+    return { name: 'home' }
+  } else if (!userAuthenticated && !['login', 'register'].includes(to.name)) {
+    return { name: 'login' }
+  }
 })
 
 export default router

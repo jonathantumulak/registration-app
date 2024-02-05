@@ -8,9 +8,11 @@ import Password from 'primevue/password'
 import Message from 'primevue/message'
 
 import { ref, nextTick } from 'vue'
-import { register } from '@/services/api'
 import router from '@/router'
 import { useUserStore } from '@/store/user'
+
+const userStore = useUserStore()
+const { registerUser } = userStore
 
 let username = ref('')
 let password = ref('')
@@ -18,36 +20,30 @@ let password2 = ref('')
 let submitting = ref(false)
 let errorMessage = ref()
 
-const userStore = useUserStore()
-const { setNewRegistered } = userStore
-
-function registerUser() {
+const submitRegister = async () => {
   errorMessage.value = null
   if (username.value === '' || password.value === '' || password2.value === '') {
-    nextTick(() => {
+    await nextTick(() => {
       errorMessage.value = ['Please input all required fields.']
     })
     return
   }
   submitting.value = true
-  errorMessage.value = null
-  register({
+  const { success, errors } = await registerUser({
     username: username.value,
     password: password.value,
     password2: password2.value
   })
-    .then(() => {
-      router.push({
-        name: 'login'
-      })
-      setNewRegistered(true)
+  if (success) {
+    await router.push({
+      name: 'login'
     })
-    .catch((error) => {
-      errorMessage.value = error.response.data
-    })
-    .then(() => {
+  } else {
+    if (errors) {
+      errorMessage.value = errors
       submitting.value = false
-    })
+    }
+  }
 }
 </script>
 
@@ -62,7 +58,7 @@ function registerUser() {
               msg
             }}</Message>
           </transition-group>
-          <form @submit.prevent="submitting === false && registerUser()">
+          <form @submit.prevent="submitting === false && submitRegister()">
             <div class="field">
               <label for="username">Username</label>
               <InputText
