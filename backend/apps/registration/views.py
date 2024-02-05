@@ -37,6 +37,8 @@ class ListNotAllowedMixin:
 
 
 class UserViewSet(ListNotAllowedMixin, viewsets.ModelViewSet):
+    """Viewset for login, logout, get session, register user"""
+
     queryset = User.objects.all()
     serializer_class = UserSerializer
     permission_classes = []
@@ -87,6 +89,8 @@ class UserViewSet(ListNotAllowedMixin, viewsets.ModelViewSet):
 
 
 class UserProfileViewSet(ListNotAllowedMixin, viewsets.ModelViewSet):
+    """Viewset for get and update user profile"""
+
     queryset = User.objects.all()
     serializer_class = UserProfileSerializer
     permission_classes = [IsAuthenticated, OwnUserPermission]
@@ -100,6 +104,8 @@ class UserProfileViewSet(ListNotAllowedMixin, viewsets.ModelViewSet):
 
 
 class InterestsViewSet(viewsets.ModelViewSet):
+    """View for getting all interests"""
+
     queryset = Interest.objects.all()
     serializer_class = InterestsSerializer
     permission_classes = [IsAuthenticated]
@@ -107,6 +113,8 @@ class InterestsViewSet(viewsets.ModelViewSet):
 
 
 class UserInterestsViewSet(ListNotAllowedMixin, viewsets.ModelViewSet):
+    """Viewset for get and update user interests"""
+
     queryset = User.objects.all()
     serializer_class = UserInterestsSerializer
     permission_classes = [IsAuthenticated, OwnUserPermission]

@@ -1,7 +1,7 @@
-version: '3.3'
+version: "3.3"
 
 volumes:
-    registration-app_data: {}
+  registration-app_data: {}
 
 services:
   backend:
@@ -22,6 +22,16 @@ services:
       - ./frontend:/app
     working_dir: /app
     restart: on-failure
+
+  migration:
+    build:
+      context: ./backend
+    volumes:
+      - ./backend:/app
+    command: python manage.py migrate
+    env_file: .env
+    depends_on:
+      - backend
 
   nginx:
     image: nginx:alpine
